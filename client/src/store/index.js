@@ -76,7 +76,7 @@ function GlobalStoreContextProvider(props) {
                 return setStore({
                     currentModal : CurrentModal.NONE,
                     idNamePairs: payload.idNamePairs,
-                    currentList: payload.playlist,
+                    currentList: null,
                     currentSongIndex: -1,
                     currentSong: null,
                     newListCounter: store.newListCounter,
@@ -180,7 +180,7 @@ function GlobalStoreContextProvider(props) {
                     newListCounter: store.newListCounter,
                     listNameActive: false,
                     listIdMarkedForDeletion: null,
-                    listMarkedForDeletion: null
+                    listMarkedForDeletion: payload.currentSong
                 });
             }
             case GlobalStoreActionType.REMOVE_SONG: {
@@ -193,7 +193,7 @@ function GlobalStoreContextProvider(props) {
                     newListCounter: store.newListCounter,
                     listNameActive: false,
                     listIdMarkedForDeletion: null,
-                    listMarkedForDeletion: null
+                    listMarkedForDeletion: payload.currentSong
                 });
             }
             case GlobalStoreActionType.HIDE_MODALS: {
@@ -257,6 +257,7 @@ function GlobalStoreContextProvider(props) {
             type: GlobalStoreActionType.CLOSE_CURRENT_LIST,
             payload: {}
         });
+        history.push("/")
         tps.clearAllTransactions();
     }
 
@@ -320,8 +321,10 @@ function GlobalStoreContextProvider(props) {
     store.deleteList = function (id) {
         async function processDelete(id) {
             let response = await api.deletePlaylistById(id);
-            if (response.data.success) {
+            console.log(response)
+            if (response.status == 200) {
                 store.loadIdNamePairs();
+                console.log("SUCCESS")
                 history.push("/");
             }
         }
@@ -356,6 +359,7 @@ function GlobalStoreContextProvider(props) {
         return store.currentModal === CurrentModal.DELETE_LIST;
     }
     store.isEditSongModalOpen = () => {
+        console.log("PAWDAW")
         return store.currentModal === CurrentModal.EDIT_SONG;
     }
     store.isRemoveSongModalOpen = () => {

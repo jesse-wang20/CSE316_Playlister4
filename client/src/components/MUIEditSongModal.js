@@ -46,7 +46,7 @@ export default function MUIEditSongModal() {
     function handleUpdateYouTubeId(event) {
         setYouTubeId(event.target.value);
     }
-
+    console.log("bruhs", store.listMarkedForDeletion)
     return (
         <Modal
             open={store.listMarkedForDeletion !== null}
@@ -54,7 +54,7 @@ export default function MUIEditSongModal() {
             <Box sx={style}>
             <div
             id="edit-song-modal"
-            className="modal is-visible"
+            className="modal-dialog"
             data-animation="slideInOutLeft">
             <div
                 id='edit-song-root'

@@ -30,7 +30,8 @@ export const GlobalStoreActionType = {
     SET_LIST_NAME_EDIT_ACTIVE: "SET_LIST_NAME_EDIT_ACTIVE",
     EDIT_SONG: "EDIT_SONG",
     REMOVE_SONG: "REMOVE_SONG",
-    HIDE_MODALS: "HIDE_MODALS"
+    HIDE_MODALS: "HIDE_MODALS",
+    LOGIN_ERROR: "LOGIN_ERROR"
 }
 
 // WE'LL NEED THIS TO PROCESS TRANSACTIONS
@@ -40,7 +41,8 @@ const CurrentModal = {
     NONE : "NONE",
     DELETE_LIST : "DELETE_LIST",
     EDIT_SONG : "EDIT_SONG",
-    REMOVE_SONG : "REMOVE_SONG"
+    REMOVE_SONG : "REMOVE_SONG",
+    LOGIN_ERROR : "LOGIN_ERROR"
 }
 
 // WITH THIS WE'RE MAKING OUR GLOBAL DATA STORE
@@ -56,7 +58,8 @@ function GlobalStoreContextProvider(props) {
         newListCounter: 0,
         listNameActive: false,
         listIdMarkedForDeletion: null,
-        listMarkedForDeletion: null
+        listMarkedForDeletion: null,
+        loginOk: null,
     });
     const history = useHistory();
 
@@ -82,7 +85,8 @@ function GlobalStoreContextProvider(props) {
                     newListCounter: store.newListCounter,
                     listNameActive: false,
                     listIdMarkedForDeletion: null,
-                    listMarkedForDeletion: null
+                    listMarkedForDeletion: null,
+                    loginOk: null,
                 });
             }
             // STOP EDITING THE CURRENT LIST
@@ -96,7 +100,8 @@ function GlobalStoreContextProvider(props) {
                     newListCounter: store.newListCounter,
                     listNameActive: false,
                     listIdMarkedForDeletion: null,
-                    listMarkedForDeletion: null
+                    listMarkedForDeletion: null,
+                    loginOk: null,
                 })
             }
             // CREATE A NEW LIST
@@ -110,7 +115,8 @@ function GlobalStoreContextProvider(props) {
                     newListCounter: store.newListCounter + 1,
                     listNameActive: false,
                     listIdMarkedForDeletion: null,
-                    listMarkedForDeletion: null
+                    listMarkedForDeletion: null,
+                    loginOk: null,
                 })
             }
             // GET ALL THE LISTS SO WE CAN PRESENT THEM
@@ -124,7 +130,8 @@ function GlobalStoreContextProvider(props) {
                     newListCounter: store.newListCounter,
                     listNameActive: false,
                     listIdMarkedForDeletion: null,
-                    listMarkedForDeletion: null
+                    listMarkedForDeletion: null,
+                    loginOk: null,
                 });
             }
             // PREPARE TO DELETE A LIST
@@ -138,7 +145,8 @@ function GlobalStoreContextProvider(props) {
                     newListCounter: store.newListCounter,
                     listNameActive: false,
                     listIdMarkedForDeletion: payload.id,
-                    listMarkedForDeletion: payload.playlist
+                    listMarkedForDeletion: payload.playlist,
+                    loginOk: null
                 });
             }
             // UPDATE A LIST
@@ -152,7 +160,8 @@ function GlobalStoreContextProvider(props) {
                     newListCounter: store.newListCounter,
                     listNameActive: false,
                     listIdMarkedForDeletion: null,
-                    listMarkedForDeletion: null
+                    listMarkedForDeletion: null,
+                    loginOk: null
                 });
             }
             // START EDITING A LIST NAME
@@ -166,7 +175,8 @@ function GlobalStoreContextProvider(props) {
                     newListCounter: store.newListCounter,
                     listNameActive: true,
                     listIdMarkedForDeletion: null,
-                    listMarkedForDeletion: null
+                    listMarkedForDeletion: null,
+                    loginOk: null
                 });
             }
             // 
@@ -180,7 +190,8 @@ function GlobalStoreContextProvider(props) {
                     newListCounter: store.newListCounter,
                     listNameActive: false,
                     listIdMarkedForDeletion: null,
-                    listMarkedForDeletion: payload.currentSong
+                    listMarkedForDeletion: payload.currentSong,
+                    loginOk: null
                 });
             }
             case GlobalStoreActionType.REMOVE_SONG: {
@@ -193,7 +204,8 @@ function GlobalStoreContextProvider(props) {
                     newListCounter: store.newListCounter,
                     listNameActive: false,
                     listIdMarkedForDeletion: null,
-                    listMarkedForDeletion: payload.currentSong
+                    listMarkedForDeletion: payload.currentSong,
+                    loginOk: null
                 });
             }
             case GlobalStoreActionType.HIDE_MODALS: {
@@ -206,7 +218,14 @@ function GlobalStoreContextProvider(props) {
                     newListCounter: store.newListCounter,
                     listNameActive: false,
                     listIdMarkedForDeletion: null,
-                    listMarkedForDeletion: null
+                    listMarkedForDeletion: null,
+                    loginOk: null
+                });
+            }
+            case GlobalStoreActionType.LOGIN_ERROR: {
+                return setStore({
+                    urrentModal : CurrentModal.LOGIN_ERROR,
+                    loginOk: payload
                 });
             }
             default:
@@ -300,7 +319,23 @@ function GlobalStoreContextProvider(props) {
         }
         asyncLoadIdNamePairs();
     }
-
+    store.logInError = function(cer){
+        let errorMessage = ""
+        if(cer == 400){
+            errorMessage = "Please enter all required fields."
+        }
+        else if (cer == 401){
+            errorMessage = "Wrong email or password provided."
+        }
+        storeReducer({
+            type: GlobalStoreActionType.LOGIN_ERROR,
+            payload: {errorMessage}
+        });
+        
+    }
+    store.FoolProof = function(){
+        return !(store.currentModal === CurrentModal.NONE);
+    }
     // THE FOLLOWING 5 FUNCTIONS ARE FOR COORDINATING THE DELETION
     // OF A LIST, WHICH INCLUDES USING A VERIFICATION MODAL. THE
     // FUNCTIONS ARE markListForDeletion, deleteList, deleteMarkedList,
@@ -364,7 +399,10 @@ function GlobalStoreContextProvider(props) {
     store.isRemoveSongModalOpen = () => {
         return store.currentModal === CurrentModal.REMOVE_SONG;
     }
-
+    store.isLoginModalOpen = () => {
+        console.log(store.currentModal === CurrentModal.LOGIN_ERROR)
+        return store.currentModal === CurrentModal.LOGIN_ERROR; 
+    }
     // THE FOLLOWING 8 FUNCTIONS ARE FOR COORDINATING THE UPDATING
     // OF A LIST, WHICH INCLUDES DEALING WITH THE TRANSACTION STACK. THE
     // FUNCTIONS ARE setCurrentList, addMoveItemTransaction, addUpdateItemTransaction,

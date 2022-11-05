@@ -1,8 +1,10 @@
 import { useContext } from 'react';
 import AuthContext from '../auth'
-
+import GlobalStoreContext from '../store';
 import Copyright from './Copyright'
 
+import { Alert } from '@mui/material';
+import MUILoginModal from './MUILoginModal'
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -18,14 +20,25 @@ import Typography from '@mui/material/Typography';
 
 export default function LoginScreen() {
     const { auth } = useContext(AuthContext);
+    const { store } = useContext(GlobalStoreContext);
 
-    const handleSubmit = (event) => {
+    let modalJSX = ""
+   // if (store.isLoginModalOpen()) {
+        modalJSX = <MUILoginModal />;
+    //}
+    const handleSubmit = (event) =>
+     {
         event.preventDefault();
-        const formData = new FormData(event.currentTarget);
-        auth.loginUser(
-            formData.get('email'),
-            formData.get('password')
-        );
+        const formData = new FormData(event.currentTarget); 
+            let temp = auth.loginUser(
+                formData.get('email'),
+                formData.get('password')
+            ).then( 
+                (val) => console.log("success in loggin in"))
+            .catch(
+                (error) => store.logInError(error.response.status)
+                
+            )
 
     };
 
@@ -47,6 +60,7 @@ export default function LoginScreen() {
                 }}
             />
             <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
+            
                 <Box
                     sx={{
                         my: 8,
@@ -111,6 +125,7 @@ export default function LoginScreen() {
                     </Box>
                 </Box>
             </Grid>
+            {modalJSX}
         </Grid>
     );
 }

@@ -78,6 +78,7 @@ loginUser = async (req, res) => {
                 email: existingUser.email              
             }
         })
+        return res
 
     } catch (err) {
         console.error(err);

@@ -10,21 +10,26 @@ const User = require('../models/user-model');
 createPlaylist = (req, res) => {
     const body = req.body;
     console.log("createPlaylist body: " + JSON.stringify(body));
-
     if (!body) {
         return res.status(400).json({
             success: false,
             error: 'You must provide a Playlist',
         })
     }
-
     const playlist = new Playlist(body);
     console.log("playlist: " + playlist.toString());
     if (!playlist) {
         return res.status(400).json({ success: false, error: err })
     }
 
+    
     User.findOne({ _id: req.userId }, (err, user) => {
+        console.log(user.email)
+        if(user.email != req.body.ownerEmail){
+            return res.status(400).json({
+                errorMessage: 'Playlist Not Created! Not the right email '
+            })
+        }
         console.log("user found: " + JSON.stringify(user));
         user.playlists.push(playlist._id);
         user
@@ -66,6 +71,14 @@ deletePlaylist = async (req, res) => {
                     Playlist.findOneAndDelete({ _id: req.params.id }, () => {
                         return res.status(200).json({});
                     }).catch(err => console.log(err))
+                    console.log("BEFORE", user)
+                    const index = user.playlists.indexOf(req.params.id);
+                    if (index > -1) { 
+                        console.log("DELETING")
+                        user.playlists.splice(index, 1); 
+                    }
+                    user.save()
+                    console.log("AFTER", user)
                 }
                 else {
                     console.log("incorrect user!");
@@ -142,16 +155,22 @@ getPlaylistPairs = async (req, res) => {
     }).catch(err => console.log(err))
 }
 getPlaylists = async (req, res) => {
-    await Playlist.find({}, (err, playlists) => {
-        if (err) {
-            return res.status(400).json({ success: false, error: err })
+    await User.findOne({ _id: req.userId }, (err, user) => {
+        console.log(user)
+        async function asyncFindList(email) {
+            await Playlist.find({ ownerEmail: email }, (err, playlists) => {
+                if (err) {
+                    return res.status(400).json({ success: false, error: err })
+                }
+                if (!playlists) {
+                    return res
+                        .status(404)
+                        .json({ success: false, error: 'Playlists not found' })
+                }
+                return res.status(200).json({ success: true, data: playlists })
+            }).catch(err => console.log(err))
         }
-        if (!playlists.length) {
-            return res
-                .status(404)
-                .json({ success: false, error: `Playlists not found` })
-        }
-        return res.status(200).json({ success: true, data: playlists })
+        asyncFindList(user.email);
     }).catch(err => console.log(err))
 }
 updatePlaylist = async (req, res) => {

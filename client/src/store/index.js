@@ -31,7 +31,8 @@ export const GlobalStoreActionType = {
     EDIT_SONG: "EDIT_SONG",
     REMOVE_SONG: "REMOVE_SONG",
     HIDE_MODALS: "HIDE_MODALS",
-    LOGIN_ERROR: "LOGIN_ERROR"
+    LOGIN_ERROR: "LOGIN_ERROR",
+    REGISTER_ERROR: "REGISTER_ERROR"
 }
 
 // WE'LL NEED THIS TO PROCESS TRANSACTIONS
@@ -42,7 +43,8 @@ const CurrentModal = {
     DELETE_LIST : "DELETE_LIST",
     EDIT_SONG : "EDIT_SONG",
     REMOVE_SONG : "REMOVE_SONG",
-    LOGIN_ERROR : "LOGIN_ERROR"
+    LOGIN_ERROR : "LOGIN_ERROR",
+    REGISTER_ERROR : "REGISTER_ERROR"
 }
 
 // WITH THIS WE'RE MAKING OUR GLOBAL DATA STORE
@@ -87,6 +89,7 @@ function GlobalStoreContextProvider(props) {
                     listIdMarkedForDeletion: null,
                     listMarkedForDeletion: null,
                     loginOk: null,
+                    registerOk: null
                 });
             }
             // STOP EDITING THE CURRENT LIST
@@ -102,6 +105,7 @@ function GlobalStoreContextProvider(props) {
                     listIdMarkedForDeletion: null,
                     listMarkedForDeletion: null,
                     loginOk: null,
+                    registerOk: null
                 })
             }
             // CREATE A NEW LIST
@@ -117,6 +121,7 @@ function GlobalStoreContextProvider(props) {
                     listIdMarkedForDeletion: null,
                     listMarkedForDeletion: null,
                     loginOk: null,
+                    registerOk: null
                 })
             }
             // GET ALL THE LISTS SO WE CAN PRESENT THEM
@@ -132,6 +137,7 @@ function GlobalStoreContextProvider(props) {
                     listIdMarkedForDeletion: null,
                     listMarkedForDeletion: null,
                     loginOk: null,
+                    registerOk: null
                 });
             }
             // PREPARE TO DELETE A LIST
@@ -146,7 +152,8 @@ function GlobalStoreContextProvider(props) {
                     listNameActive: false,
                     listIdMarkedForDeletion: payload.id,
                     listMarkedForDeletion: payload.playlist,
-                    loginOk: null
+                    loginOk: null,
+                    registerOk: null
                 });
             }
             // UPDATE A LIST
@@ -161,7 +168,8 @@ function GlobalStoreContextProvider(props) {
                     listNameActive: false,
                     listIdMarkedForDeletion: null,
                     listMarkedForDeletion: null,
-                    loginOk: null
+                    loginOk: null,
+                    registerOk: null
                 });
             }
             // START EDITING A LIST NAME
@@ -176,7 +184,8 @@ function GlobalStoreContextProvider(props) {
                     listNameActive: true,
                     listIdMarkedForDeletion: null,
                     listMarkedForDeletion: null,
-                    loginOk: null
+                    loginOk: null,
+                    registerOk: null
                 });
             }
             // 
@@ -191,7 +200,8 @@ function GlobalStoreContextProvider(props) {
                     listNameActive: false,
                     listIdMarkedForDeletion: null,
                     listMarkedForDeletion: payload.currentSong,
-                    loginOk: null
+                    loginOk: null,
+                    registerOk: null
                 });
             }
             case GlobalStoreActionType.REMOVE_SONG: {
@@ -205,7 +215,8 @@ function GlobalStoreContextProvider(props) {
                     listNameActive: false,
                     listIdMarkedForDeletion: null,
                     listMarkedForDeletion: payload.currentSong,
-                    loginOk: null
+                    loginOk: null,
+                    registerOk: null
                 });
             }
             case GlobalStoreActionType.HIDE_MODALS: {
@@ -219,13 +230,22 @@ function GlobalStoreContextProvider(props) {
                     listNameActive: false,
                     listIdMarkedForDeletion: null,
                     listMarkedForDeletion: null,
-                    loginOk: null
+                    loginOk: null,
+                    registerOk: null
                 });
             }
             case GlobalStoreActionType.LOGIN_ERROR: {
                 return setStore({
-                    urrentModal : CurrentModal.LOGIN_ERROR,
-                    loginOk: payload
+                    currentModal : CurrentModal.LOGIN_ERROR,
+                    loginOk: payload,
+                    registerOk: null
+                });
+            }
+            case GlobalStoreActionType.REGISTER_ERROR: {
+                return setStore({
+                    currentModal: CurrentModal.REGISTER_ERROR,
+                    loginOk: null,
+                    registerOk: payload
                 });
             }
             default:
@@ -333,7 +353,16 @@ function GlobalStoreContextProvider(props) {
         });
         
     }
+    store.registerError = function(cer){
+        let errorMessage = cer
+        console.log("FAILED", cer)
+        storeReducer({
+            type: GlobalStoreActionType.REGISTER_ERROR,
+            payload: {errorMessage}
+        });
+    }
     store.FoolProof = function(){
+        console.log(!(store.currentModal === CurrentModal.NONE))
         return !(store.currentModal === CurrentModal.NONE);
     }
     // THE FOLLOWING 5 FUNCTIONS ARE FOR COORDINATING THE DELETION
@@ -364,6 +393,9 @@ function GlobalStoreContextProvider(props) {
             }
         }
         processDelete(id);
+    }
+    store.resetScreen = function () {
+        history.push("/")
     }
     store.deleteMarkedList = function() {
         store.deleteList(store.listIdMarkedForDeletion);
@@ -431,7 +463,7 @@ function GlobalStoreContextProvider(props) {
     }
     store.addNewSong = function() {
         let index = this.getPlaylistSize();
-        this.addCreateSongTransaction(index, "Untitled", "?", "dQw4w9WgXcQ");
+        this.addCreateSongTransaction(index, "Untitled", "Unknown", "dQw4w9WgXcQ");
     }
     // THIS FUNCTION CREATES A NEW SONG IN THE CURRENT LIST
     // USING THE PROVIDED DATA AND PUTS THIS SONG AT INDEX
@@ -488,7 +520,7 @@ function GlobalStoreContextProvider(props) {
     store.addNewSong = () => {
         let playlistSize = store.getPlaylistSize();
         store.addCreateSongTransaction(
-            playlistSize, "Untitled", "?", "dQw4w9WgXcQ");
+            playlistSize, "Untitled", "Unknown", "dQw4w9WgXcQ");
     }
     // THIS FUNCDTION ADDS A CreateSong_Transaction TO THE TRANSACTION STACK
     store.addCreateSongTransaction = (index, title, artist, youTubeId) => {

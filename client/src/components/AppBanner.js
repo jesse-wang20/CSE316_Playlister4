@@ -8,6 +8,7 @@ import EditToolbar from './EditToolbar'
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
@@ -31,10 +32,17 @@ export default function AppBanner() {
     const handleLogout = () => {
         handleMenuClose();
         auth.logoutUser();
+        store.newListCounter = 0;
         store.closeCurrentList();
     }
-
     const menuId = 'primary-search-account-menu';
+    let val = false
+    if(store.loginOk || store.registerOk){
+        val = true 
+    }
+    if(auth.loggedIn){
+        val = false;
+    }
     const loggedOutMenu = (
         <Menu
             anchorEl={anchorEl}
@@ -51,8 +59,8 @@ export default function AppBanner() {
             open={isMenuOpen}
             onClose={handleMenuClose}
         >
-            <MenuItem onClick={handleMenuClose}><Link to='/login/'>Login</Link></MenuItem>
-            <MenuItem onClick={handleMenuClose}><Link to='/register/'>Create New Account</Link></MenuItem>
+            <MenuItem onClick={handleMenuClose} ><Link to='/login/'>Login</Link></MenuItem>
+            <MenuItem onClick={handleMenuClose} ><Link to='/register/'>Create New Account</Link></MenuItem>
         </Menu>
     );
     const loggedInMenu = 
@@ -91,6 +99,9 @@ export default function AppBanner() {
         else
             return <AccountCircle />;
     }
+    function handleHome(){
+        store.closeCurrentList()
+    }
 
     return (
         <Box sx={{ flexGrow: 1 }}>
@@ -102,7 +113,8 @@ export default function AppBanner() {
                         component="div"
                         sx={{ display: { xs: 'none', sm: 'block' } }}                        
                     >
-                        <Link style={{ textDecoration: 'none', color: 'white' }} to='/'>⌂</Link>
+                        <IconButton color="inherit" size="large" disabled = {val || store.FoolProof()} onClick={handleHome}>⌂</IconButton>
+                        {/* <Link style={{ textDecoration: 'none', color: 'white' }} to='/'>⌂</Link> */}
                     </Typography>
                     <Box sx={{ flexGrow: 1 }}>{editToolbar}</Box>
                     <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
@@ -114,6 +126,7 @@ export default function AppBanner() {
                             aria-haspopup="true"
                             onClick={handleProfileMenuOpen}
                             color="inherit"
+                            disabled = {val || store.FoolProof()}
                         >
                             { getAccountMenu(auth.loggedIn) }
                         </IconButton>

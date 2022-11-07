@@ -1,7 +1,9 @@
 import { useContext } from 'react';
 import AuthContext from '../auth'
+import GlobalStoreContext from '../store';
 import Copyright from './Copyright'
 
+import MUIRegisterModal from './MUIRegisterModal';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -15,17 +17,28 @@ import Typography from '@mui/material/Typography';
 
 export default function RegisterScreen() {
     const { auth } = useContext(AuthContext);
-
+    const { store } = useContext(GlobalStoreContext);
+    let modalJSX = ""
+    console.log("regOk", store.registerOk)
+    if(store.registerOk){
+        modalJSX = <MUIRegisterModal />;
+    }
+    console.log("MODAL", modalJSX)
     const handleSubmit = (event) => {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
-        auth.registerUser(
+        let temp = auth.registerUser(
             formData.get('firstName'),
             formData.get('lastName'),
             formData.get('email'),
             formData.get('password'),
             formData.get('passwordVerify')
-        );
+        ).then( 
+            (val) => console.log("success in register in"))
+        .catch(
+            (error) => store.registerError(error.response.data.errorMessage)
+            
+        )
     };
 
     return (
@@ -117,6 +130,7 @@ export default function RegisterScreen() {
                             </Grid>
                         </Grid>
                     </Box>
+                    {modalJSX}
                 </Box>
                 <Copyright sx={{ mt: 5 }} />
             </Container>
